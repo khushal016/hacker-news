@@ -9,7 +9,7 @@
 
 - Need docker and docker-compose to start the project
 
-### Clone
+#### Clone
 
 - Clone this repo to your local machine using `https://github.com/khushal016/hacker-news.git`
 
@@ -40,5 +40,8 @@ $ docker logs -f hacker-news
 
 - **Get Top 10 stories ranked by score in the last 10 minutes**
     - http://localhost:8080/top-stories
+    
+- **Get all past top stories**
+    - http://localhost:8080/past-stories
 
 
