@@ -29,4 +29,15 @@ public class NewsController {
             return new ResponseEntity<>(new StoriesResponseDTO(false, "Something went wrong"), HttpStatus.OK);
         }
     }
+
+    @RequestMapping(value = "/past-stories", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<StoriesResponseDTO> getPastStories() {
+        logger.info("Request for past stories");
+        try {
+            return new ResponseEntity<>(newsService.getPastStories(), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Exception fetching past stories---", e);
+            return new ResponseEntity<>(new StoriesResponseDTO(false, "Something went wrong"), HttpStatus.OK);
+        }
+    }
 }

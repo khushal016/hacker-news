@@ -2,10 +2,7 @@ package com.paytm.insider.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.paytm.insider.util.CustomDateTimeDeserializer;
-import com.paytm.insider.util.CustomDateTimeSerializer;
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 

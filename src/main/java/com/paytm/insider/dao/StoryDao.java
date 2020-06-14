@@ -40,7 +40,11 @@ public class StoryDao {
         return Objects.requireNonNull(zSetOperations.range(Constants.STORY, 0, -1)).parallelStream().filter(s -> s.getId().equals(storyId)).findFirst();
     }
 
-    public Set<Story> findAll(DateTime startTime, DateTime endTime) {
+    public Set<Story> findByTime(DateTime startTime, DateTime endTime) {
         return zSetOperations.rangeByScore(Constants.STORY, startTime.getMillis(), endTime.getMillis(), 0, -1);
+    }
+
+    public Set<Story> findAll() {
+        return zSetOperations.range(Constants.STORY, 0, -1);
     }
 }

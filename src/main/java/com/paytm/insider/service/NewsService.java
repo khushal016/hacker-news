@@ -33,12 +33,25 @@ public class NewsService {
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
         DateTime endTime = DateTime.now();
         DateTime startTime = endTime.minusMinutes(10);
-        for (Story story : storyDao.findAll(startTime, endTime).stream().sorted(Comparator.comparing(Story::getScore).reversed()).limit(10L).collect(Collectors.toList())) {
+        for (Story story : storyDao.findByTime(startTime, endTime).stream().sorted(Comparator.comparing(Story::getScore).reversed()).limit(10L).collect(Collectors.toList())) {
             storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
         }
         if (storiesList.isEmpty()) {
-            return new StoriesResponseDTO(false, "No Stories found");
+            return new StoriesResponseDTO(true, "No Stories found");
         }
+        return new StoriesResponseDTO(storiesList);
+    }
+
+    public StoriesResponseDTO getPastStories() {
+        StoryDao storyDao = new StoryDao(redisTemplate);
+        List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
+        for (Story story : storyDao.findAll()) {
+            storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
+        }
+        if (storiesList.isEmpty()) {
+            return new StoriesResponseDTO(true, "No Stories found");
+        }
+        storiesList.sort(Comparator.comparing(StoriesResponseDTO.Stories::getScore).reversed());
         return new StoriesResponseDTO(storiesList);
     }
 }
