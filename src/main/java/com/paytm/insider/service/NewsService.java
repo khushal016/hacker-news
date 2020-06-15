@@ -28,8 +28,14 @@ public class NewsService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private StoryDao storyDao;
+
+    /**
+     * Returns Top 10 Hacker News Stories in last 10 mins
+     * @return List of top 10 stories
+     */
     public StoriesResponseDTO getTopStories() {
-        StoryDao storyDao = new StoryDao(redisTemplate);
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
         DateTime endTime = DateTime.now();
         DateTime startTime = endTime.minusMinutes(10);
@@ -42,8 +48,11 @@ public class NewsService {
         return new StoriesResponseDTO(storiesList);
     }
 
+    /**
+     * Returns all the past top stories that were served previously
+     * @return List of past top stories
+     */
     public StoriesResponseDTO getPastStories() {
-        StoryDao storyDao = new StoryDao(redisTemplate);
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
         for (Story story : storyDao.findAll()) {
             storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
