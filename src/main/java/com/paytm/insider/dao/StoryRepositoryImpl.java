@@ -16,9 +16,9 @@ import java.util.Set;
 
 @Repository
 @SuppressWarnings("rawtypes, unchecked")
-public class StoryDao {
+public class StoryRepositoryImpl implements StoryRepository{
 
-    private final Logger logger = LoggerFactory.getLogger(StoryDao.class);
+    private final Logger logger = LoggerFactory.getLogger(StoryRepositoryImpl.class);
 
     private static final String KEY = "Story";
 
@@ -27,7 +27,7 @@ public class StoryDao {
     private final RedisTemplate redisTemplate;
 
     @Autowired
-    public StoryDao(RedisTemplate redisTemplate) {
+    public StoryRepositoryImpl(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

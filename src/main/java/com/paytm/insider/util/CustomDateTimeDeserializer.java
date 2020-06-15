@@ -13,9 +13,11 @@ public class CustomDateTimeDeserializer extends JsonDeserializer<String> {
 
     DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
+    private static final int MILLIS = 1000;
+
     @Override
     public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-        DateTime dateTime =  new DateTime(1000 * jsonParser.getLongValue());
+        DateTime dateTime =  new DateTime(MILLIS * jsonParser.getLongValue());
         return formatter.print(dateTime);
     }
 }

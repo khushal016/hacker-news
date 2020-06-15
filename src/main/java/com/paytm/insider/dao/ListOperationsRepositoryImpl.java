@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Repository
 @SuppressWarnings("rawtypes, unchecked")
-public class ListOperationsDao {
+public class ListOperationsRepositoryImpl implements ListOperationsRepository{
 
     private static final String KEY = "ignored";
 
@@ -20,7 +20,7 @@ public class ListOperationsDao {
     private final RedisTemplate redisTemplate;
 
     @Autowired
-    public ListOperationsDao(RedisTemplate redisTemplate) {
+    public ListOperationsRepositoryImpl(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

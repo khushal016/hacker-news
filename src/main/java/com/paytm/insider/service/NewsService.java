@@ -1,15 +1,17 @@
 package com.paytm.insider.service;
 
-import com.paytm.insider.dao.StoryDao;
+import com.paytm.insider.dao.StoryRepository;
+import com.paytm.insider.dto.Comment;
+import com.paytm.insider.dto.CommentsResponseDTO;
 import com.paytm.insider.dto.StoriesResponseDTO;
 import com.paytm.insider.dto.Story;
+import com.paytm.insider.util.NewsUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,19 +19,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@SuppressWarnings(value = "rawtypes")
 public class NewsService {
 
     private final Logger logger = LoggerFactory.getLogger(NewsService.class);
 
     @Autowired
-    private RestTemplate restTemplate;
+    StoryRepository storyRepository;
 
     @Autowired
-    private RedisTemplate redisTemplate;
-
-    @Autowired
-    private StoryDao storyDao;
+    NewsUtil newsUtil;
 
     /**
      * Returns Top 10 Hacker News Stories in last 10 mins
@@ -39,10 +37,11 @@ public class NewsService {
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
         DateTime endTime = DateTime.now();
         DateTime startTime = endTime.minusMinutes(10);
-        for (Story story : storyDao.findByTime(startTime, endTime).stream().sorted(Comparator.comparing(Story::getScore).reversed()).limit(10L).collect(Collectors.toList())) {
+        for (Story story : storyRepository.findByTime(startTime, endTime).stream().sorted(Comparator.comparing(Story::getScore).reversed()).limit(10L).collect(Collectors.toList())) {
             storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
         }
         if (storiesList.isEmpty()) {
+            logger.info("No Stories found in last 10 mins");
             return new StoriesResponseDTO(true, "No Stories found");
         }
         return new StoriesResponseDTO(storiesList);
@@ -54,13 +53,50 @@ public class NewsService {
      */
     public StoriesResponseDTO getPastStories() {
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
-        for (Story story : storyDao.findAll()) {
+        for (Story story : storyRepository.findAll()) {
             storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
         }
         if (storiesList.isEmpty()) {
+            logger.info("No Stories found in cache");
             return new StoriesResponseDTO(true, "No Stories found");
         }
         storiesList.sort(Comparator.comparing(StoriesResponseDTO.Stories::getScore).reversed());
         return new StoriesResponseDTO(storiesList);
     }
+
+    public CommentsResponseDTO getComments(Long storyId) {
+        Story story = newsUtil.getStory(storyId);
+        if (story == null) {
+            logger.info("Story:{} not found", storyId);
+            return new CommentsResponseDTO(false, "Invalid story id");
+        }
+        List<Comment> comments = new ArrayList<>();
+        for (Long commentId : story.getComments()) {
+            if (comments.isEmpty() || comments.size() <= 10) {
+                Comment comment = newsUtil.getComment(commentId);
+                if (comment != null) {
+                    comments.add(comment);
+                }
+            } else {
+                break;
+            }
+        }
+        if (comments.isEmpty()) {
+            logger.info("Comments not found for story:{}", storyId);
+            return new CommentsResponseDTO(false, "No comments found");
+        }
+        comments.sort(commentComparator);
+        List<CommentsResponseDTO.Comment> commentList = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentList.add(new CommentsResponseDTO.Comment(comment.getText(), comment.getBy(), comment.getUser().getAge()));
+        }
+        return new CommentsResponseDTO(commentList);
+    }
+
+    Comparator<Comment> commentComparator = (comment1, comment2) -> {
+        if (comment1.getComments() == null) return 1;
+        if (comment2.getComments() == null) return -1;
+        return comment2.getComments().size() - comment1.getComments().size();
+    };
+
 }

@@ -1,23 +1,19 @@
 package com.paytm.insider.service;
 
-import com.paytm.insider.constants.Constants;
-import com.paytm.insider.dao.ListOperationsDao;
-import com.paytm.insider.dao.StoryDao;
+import com.paytm.insider.dao.ListOperationsRepository;
+import com.paytm.insider.dao.StoryRepository;
 import com.paytm.insider.dto.Story;
+import com.paytm.insider.util.NewsUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class CacheService {
@@ -25,60 +21,48 @@ public class CacheService {
     private final Logger logger = LoggerFactory.getLogger(CacheService.class);
 
     @Autowired
-    private RestTemplate restTemplate;
+    StoryRepository storyRepository;
 
     @Autowired
-    private StoryDao storyDao;
+    ListOperationsRepository listOperationsRepository;
 
     @Autowired
-    private ListOperationsDao listOperationsDao;
+    HNApiService hnApiService;
+
+    @Autowired
+    NewsUtil newsUtil;
 
     @Scheduled(fixedRate = 60000)
     private void updateCache(){
         logger.info("Updating cache at: {}", DateTime.now());
         List<Story> stories = getStories();
-        if (stories.isEmpty()) {
+        if (stories == null || stories.isEmpty()) {
             logger.info("No new stories");
             return;
         }
         insertStories(stories);
     }
 
-    /**
-     * Returns Top 500 story ids from Hacker news
-     * @return List of ids
-     */
-    private List<Long> getTopStories(){
-        logger.info("Requesting top 500 stories from hacker news");
-        ResponseEntity<List<Long>> response = restTemplate.exchange(Constants.HN_TOP_STORIES_URL, HttpMethod.GET,  null, new ParameterizedTypeReference<List<Long>>() {}, Collections.emptyMap());
-        if (response.getStatusCode().equals(HttpStatus.OK) && response.getBody() != null) {
-            return response.getBody();
-        }
-        return new ArrayList<>();
-    }
+
 
     /**
      * Returns Top stories not present in cache
      * @return List of Stories
      */
     private List<Story> getStories() {
-        List<Long> ids = getTopStories();
-        if (listOperationsDao.size() > 0) {
-            ids.removeAll(listOperationsDao.findAll());
-            logger.info("Removed {} stories", listOperationsDao.size());
+        List<Long> ids = hnApiService.getTopStories();
+        if (ids == null || ids.isEmpty()) {
+            return null;
+        }
+        if (listOperationsRepository.size() > 0) {
+            ids.removeAll(listOperationsRepository.findAll());
+            logger.info("Removed {} stories", listOperationsRepository.size());
         }
         List<Story> stories = new ArrayList<>();
         for (Long storyId : ids) {
-            Optional<Story> story = storyDao.findById(storyId);
-            if (story.isPresent()) {
-                logger.info("Story:{} already present updating time", storyId);
-                stories.add(story.get());
-                continue;
-            }
-            logger.info("Request for story:{}", storyId);
-            ResponseEntity<Story> storyResponse = restTemplate.exchange(Constants.HN_STORY_URL + storyId + ".json?print=pretty", HttpMethod.GET,  null, Story.class);
-            if (storyResponse.getStatusCode().equals(HttpStatus.OK) && storyResponse.getBody() != null) {
-                stories.add(storyResponse.getBody());
+            Story story = newsUtil.getStory(storyId);
+            if (story != null) {
+                stories.add(story);
             }
         }
         return stories;
@@ -93,12 +77,12 @@ public class CacheService {
         int i = 0;
         for (Story story : stories) {
             if (i < 10) {
-                storyDao.save(story);
+                storyRepository.save(story);
             } else {
-                listOperationsDao.insert(story.getId());
-                if (listOperationsDao.size() > 500) {
+                listOperationsRepository.insert(story.getId());
+                if (listOperationsRepository.size() > 500) {
                     //Storing only 500 elements in the list
-                    listOperationsDao.removeLast();
+                    listOperationsRepository.removeLast();
                 }
             }
             i++;
