@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -64,6 +63,11 @@ public class NewsService {
         return new StoriesResponseDTO(storiesList);
     }
 
+    /**
+     * Return top 10 parent comments for a story
+     * @param storyId  story id
+     * @return list of comments
+     */
     public CommentsResponseDTO getComments(Long storyId) {
         Story story = newsUtil.getStory(storyId);
         if (story == null) {

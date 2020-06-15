@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,6 +69,11 @@ public class HNApiService {
         return null;
     }
 
+    /**
+     * Get user from Hacker news
+     * @param userId user id
+     * @return User
+     */
     public User getUser(String userId) {
         logger.info("Request for user:{}", userId);
         ResponseEntity<User> response = restTemplate.exchange(Constants.HN_USER_URL + userId + ".json?print=pretty", HttpMethod.GET,  null, User.class);
