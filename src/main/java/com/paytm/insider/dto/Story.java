@@ -36,6 +36,15 @@ public class Story implements Serializable {
 
     private String url;
 
+    public Story(Long id, String time, Integer score) {
+        this.id = id;
+        this.time = time;
+        this.score = score;
+    }
+
+    public Story() {
+    }
+
     public Long getId() {
         return id;
     }

@@ -61,7 +61,7 @@ public class NewsUtil {
         return comment;
     }
 
-    private User getUser(String userId) {
+    public User getUser(String userId) {
         User user = userRepository.findById(userId);
         if (user != null) {
             logger.info("User:{} found in cache", userId);

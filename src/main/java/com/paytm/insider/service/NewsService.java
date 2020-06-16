@@ -75,24 +75,27 @@ public class NewsService {
             return new CommentsResponseDTO(false, "Invalid story id");
         }
         List<Comment> comments = new ArrayList<>();
-        for (Long commentId : story.getComments()) {
-            if (comments.isEmpty() || comments.size() <= 10) {
-                Comment comment = newsUtil.getComment(commentId);
-                if (comment != null) {
-                    comments.add(comment);
+        if (story.getComments() != null && !story.getComments().isEmpty()) {
+            for (Long commentId : story.getComments()) {
+                if (comments.size() <= 10) {
+                    Comment comment = newsUtil.getComment(commentId);
+                    if (comment != null) {
+                        comments.add(comment);
+                    }
+                } else {
+                    break;
                 }
-            } else {
-                break;
             }
         }
         if (comments.isEmpty()) {
             logger.info("Comments not found for story:{}", storyId);
-            return new CommentsResponseDTO(false, "No comments found");
+            return new CommentsResponseDTO(true, "No comments found");
         }
         comments.sort(commentComparator);
         List<CommentsResponseDTO.Comment> commentList = new ArrayList<>();
         for (Comment comment : comments) {
-            commentList.add(new CommentsResponseDTO.Comment(comment.getText(), comment.getBy(), comment.getUser().getAge()));
+            int age = comment.getUser() != null ? comment.getUser().getAge() : 0;
+            commentList.add(new CommentsResponseDTO.Comment(comment.getText(), comment.getBy(), age));
         }
         return new CommentsResponseDTO(commentList);
     }
