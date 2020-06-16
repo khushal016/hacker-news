@@ -12,18 +12,28 @@ public class StoriesResponseDTO {
     private boolean success = true;
 
     public static class Stories {
+        private Long id;
         private String title;
         private String url;
         private Integer score;
         private String time;
         private String user;
 
-        public Stories(String title, String url, Integer score, String time, String user) {
+        public Stories(Long id, String title, String url, Integer score, String time, String user) {
+            this.id = id;
             this.title = title;
             this.url = url;
             this.score = score;
             this.time = time;
             this.user = user;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
         }
 
         public String getTitle() {

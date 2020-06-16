@@ -37,7 +37,7 @@ public class NewsService {
         DateTime endTime = DateTime.now();
         DateTime startTime = endTime.minusMinutes(10);
         for (Story story : storyRepository.findByTime(startTime, endTime).stream().sorted(Comparator.comparing(Story::getScore).reversed()).limit(10L).collect(Collectors.toList())) {
-            storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
+            storiesList.add(new StoriesResponseDTO.Stories(story.getId(), story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
         }
         if (storiesList.isEmpty()) {
             logger.info("No Stories found in last 10 mins");
@@ -53,7 +53,7 @@ public class NewsService {
     public StoriesResponseDTO getPastStories() {
         List<StoriesResponseDTO.Stories> storiesList = new ArrayList<>();
         for (Story story : storyRepository.findAll()) {
-            storiesList.add(new StoriesResponseDTO.Stories(story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
+            storiesList.add(new StoriesResponseDTO.Stories(story.getId(), story.getTitle(), story.getUrl(), story.getScore(), story.getTime(), story.getUser()));
         }
         if (storiesList.isEmpty()) {
             logger.info("No Stories found in cache");
