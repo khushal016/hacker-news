@@ -1,17 +1,29 @@
-# Hacker News
+# Hacker News API
 
-## Table of Contents
+Hacker News API implementation using Spring boot and Redis
 
-- [Setup](#setup)
-- [Features](#features)
+- It pulls the top stories from hacker news and stores top 10 stories ranked by score every minute
+- Top stories are saved in redis, sorted by insert timestamp in a sorted set
 
-## Setup
+
+
+## Quick Start
 
 - Need docker and docker-compose to start the project
+- If you want to run this project without docker then change redis hostname to 'localhost' in HNConfiguration.java
 
-#### Clone
 
-- Clone this repo to your local machine using `https://github.com/khushal016/hacker-news.git`
+> clone this repo
+
+```shell
+$ git clone https://github.com/khushal016/hacker-news.git
+```
+
+> cd to repo folder
+
+```shell
+$ cd hacker-news
+```
 
 > generate jar file
 
@@ -30,13 +42,13 @@ $ docker build -t hacker-news .
 $ docker-compose up -d
 ```
 
-> check service logs
+> check application logs
 
 ```shell
 $ docker logs -f hacker-news
 ```
 
-## Features
+## Example
 
 - **Get Top 10 stories ranked by score in the last 10 minutes**
     - http://localhost:8080/top-stories

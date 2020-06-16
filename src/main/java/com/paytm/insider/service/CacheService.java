@@ -43,8 +43,6 @@ public class CacheService {
         insertStories(stories);
     }
 
-
-
     /**
      * Returns Top stories not present in cache
      * @return List of Stories

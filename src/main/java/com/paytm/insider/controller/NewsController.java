@@ -45,7 +45,7 @@ public class NewsController {
 
     @RequestMapping(value = "/comments", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<CommentsResponseDTO> getComments(@RequestParam Long storyId) {
-        logger.info("Request for top 10 comments");
+        logger.info("Request for top 10 comments for storyId:{}", storyId);
         try {
             return new ResponseEntity<>(newsService.getComments(storyId), HttpStatus.OK);
         } catch (Exception e) {

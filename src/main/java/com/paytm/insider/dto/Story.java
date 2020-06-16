@@ -26,7 +26,6 @@ public class Story implements Serializable {
 
     private Integer score;
 
-    //@JsonSerialize(using = CustomDateTimeSerializer.class)
     @JsonDeserialize(using = CustomDateTimeDeserializer.class)
     private String time;
 

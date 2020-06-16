@@ -100,6 +100,7 @@ public class NewsService {
         return new CommentsResponseDTO(commentList);
     }
 
+    //Sort comments by total number of child comments
     Comparator<Comment> commentComparator = (comment1, comment2) -> {
         if (comment1.getComments() == null) return 1;
         if (comment2.getComments() == null) return -1;
